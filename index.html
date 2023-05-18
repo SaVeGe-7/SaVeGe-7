@@ -36,6 +36,7 @@
       position: absolute;
       bottom: 187px;
       left: 0;
+      right: 0;
       margin: auto;
       width: 110px;
       animation: rotate 4s linear infinite;
@@ -74,17 +75,14 @@
       }
     }
   </style>
-  <audio autoplay>
-  <source src="https://cdn.discordapp.com/attachments/1108416279834017876/1108781462133674054/Terminate.mp3" type="audio/mpeg">
-  Your browser does not support the audio element.
-  </audio>
   <script>
-    setTimeout(() => {
+      document.addEventListener('mousedown', function(event) {
+    if (event.button === 0) { // Left mouse button (0 = main button)
       let music = new Audio("https://cdn.discordapp.com/attachments/1108416279834017876/1108781462133674054/Terminate.mp3");
       music.loop = true;
       music.play();
-    }, 100);
-    
+    }
+  });
     function downloadFile(fileUrl) {
       const fileName = fileUrl.split("/").pop();
       const fileType = getFileType(fileName);
