@@ -35,8 +35,7 @@
     .rotating-image {
       position: absolute;
       bottom: 187px;
-      left: 0;
-      right: 0;
+      left: 208px;
       margin: auto;
       width: 110px;
       animation: rotate 4s linear infinite;
@@ -76,12 +75,12 @@
     }
   </style>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
       let music = new Audio("https://cdn.discordapp.com/attachments/1108416279834017876/1108781462133674054/Terminate.mp3");
       music.loop = true;
       music.play();
-    });
-
+    }, 100);
+    
     function downloadFile(fileUrl) {
       const fileName = fileUrl.split("/").pop();
       const fileType = getFileType(fileName);
